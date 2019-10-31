@@ -1,31 +1,39 @@
 extern crate rosc;
 
 use rosc::OscPacket;
+use std::io;
 use std::env;
 use std::net::{SocketAddrV4, UdpSocket};
 use std::str::FromStr;
 
+fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
+    match SocketAddrV4::from_str(arg) {
+        Ok(address) => address,
+        Err(_) => panic!("Invalid ip:port address")
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let usage = format!("Usage {} IP:PORT", &args[0]);
-    if args.len() < 2 {
+    let usage = format!("Usage: {} RECEIVE_IP:RECEIVE_PORT SEND_IP:SEND_PORT", &args[0]);
+    if args.len() < 3 {
         println!("{}", usage);
-        ::std::process::exit(1)
+        panic!(usage)
     }
-    let addr = match SocketAddrV4::from_str(&args[1]) {
-        Ok(addr) => addr,
-        Err(_) => panic!(usage),
-    };
-    let sock = UdpSocket::bind(addr).unwrap();
-    println!("Listening to {}", addr);
+    let receive_address = get_addr_from_arg(&args[1]);
+    // let send_address = get_addr_from_arg(&args[2]);
 
-    let mut buf = [0u8; rosc::decoder::MTU];
+    let sock = UdpSocket::bind(receive_address).unwrap();
+    println!("Listening to {}", receive_address);
+
+    let mut receive_buffer = [0u8; rosc::decoder::MTU];
 
     loop {
-        match sock.recv_from(&mut buf) {
+
+        match sock.recv_from(&mut receive_buffer) {
             Ok((size, addr)) => {
                 println!("Received packet (length {}) from: {}", size, addr);
-                let packet = rosc::decoder::decode(&buf[..size]).unwrap();
+                let packet = rosc::decoder::decode(&receive_buffer[..size]).unwrap();
                 handle_packet(packet);
             }
             Err(e) => {
@@ -33,6 +41,12 @@ fn main() {
                 break;
             }
         }
+
+        let mut command = String::new();
+
+        io::stdin().read_line(&mut command)
+            .expect("Could not read that command");
+
     }
 }
 
