@@ -39,7 +39,6 @@ fn main() {
 fn handle_packet(packet: OscPacket) {
     match packet {
         OscPacket::Message(msg) => {
-            println!("OSC address: {}", msg.addr);
             let arg_list = match msg.args {
                 Some(args) => {
                     format!("{:?}", args)
@@ -48,7 +47,7 @@ fn handle_packet(packet: OscPacket) {
                    String::from("zero")
                 }
             };
-            println!("Args: {}", arg_list);
+            println!("RCV OSC {} :: {}", msg.addr, arg_list);
         }
         OscPacket::Bundle(bundle) => {
             println!("OSC Bundle: {:?}", bundle);
