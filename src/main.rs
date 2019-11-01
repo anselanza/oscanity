@@ -62,8 +62,15 @@ fn send_message(socket: &std::net::UdpSocket, destination_address: std::net::Soc
     
     for part in &parts[1..parts.len()]  { // skip first element
         println!("part: {:?}", part);
-        args.push(OscType::String(part.to_string()));
+        
+        match part.parse::<i32>() {
+            Ok(value) => args.push(OscType::Int(value)),
+            Err(e) => args.push(OscType::String(part.to_string()))
+        }
+
     }
+
+    println!("final args: {:?}", args);
 
     let osc_address = parts[0];
     println!("will send {} args to address {}", args.len(), osc_address);
