@@ -23,17 +23,21 @@ fn main() {
 
     loop {
 
-        // match sock.recv_from(&mut receive_buffer) {
-        //     Ok((size, addr)) => {
-        //         println!("Received packet (length {}) from: {}", size, addr);
-        //         let packet = rosc::decoder::decode(&receive_buffer[..size]).unwrap();
-        //         handle_packet(packet);
-        //     }
-        //     Err(e) => {
-        //         println!("Error receiving from socket: {}", e);
-        //         break;
-        //     }
-        // }
+        match socket.recv_from(&mut receive_buffer) {
+            Ok((size, addr)) => {
+                println!("Received packet (length {}) from: {}", size, addr);
+                let packet = rosc::decoder::decode(&receive_buffer[..size]).unwrap();
+                handle_packet(packet);
+            }
+            Err(e) => {
+                println!("Error receiving from socket: {}", e);
+                break;
+            }
+            _ => {
+                println!("something else");
+                break;
+            }
+        }
 
         let mut command = String::new();
 
