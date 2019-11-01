@@ -62,12 +62,8 @@ fn send_message(socket: &std::net::UdpSocket, destination_address: std::net::Soc
     
     for part in &parts[1..parts.len()]  { // skip first element
         println!("part: {:?}", part);
-        
-        match part.parse::<i32>() {
-            Ok(value) => args.push(OscType::Int(value)),
-            Err(e) => args.push(OscType::String(part.to_string()))
-        }
 
+        args.push(auto_type_arg(part));
     }
 
     println!("final args: {:?}", args);
@@ -86,6 +82,35 @@ fn send_message(socket: &std::net::UdpSocket, destination_address: std::net::Soc
     }
 
 }
+
+fn auto_type_arg (part: &str) -> OscType {
+    
+    // let mut number: Option<OscType> = None;
+
+    let osc_int = match part.parse::<i32>() {
+        Ok(value) => Some(OscType::Int(value)),
+        Err(e) => None
+    };
+
+    let osc_float = match part.parse::<f32>() {
+        Ok(value) => Some(OscType::Float(value)),
+        Err(e) => None
+    };
+
+    if osc_int.is_some() {
+        osc_int.unwrap()
+    } else if osc_float.is_some() {
+        osc_float.unwrap()
+    } else {
+        OscType::String(part.to_string())
+    }
+
+    // match number {
+    //     Some(number) => number,
+    //     _ => OscType::String(part.to_string())
+    // }
+}
+
 
 fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
     match SocketAddrV4::from_str(arg) {
