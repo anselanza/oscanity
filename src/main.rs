@@ -59,20 +59,24 @@ fn send_message(socket: &std::net::UdpSocket, destination_address: std::net::Soc
     let parts = command.split_whitespace().collect::<Vec<&str>>();
     println!("parts: {:?}", parts);
     let mut args: Vec<OscType> = Vec::new();
+    
     for part in &parts[1..parts.len()]  { // skip first element
         println!("part: {:?}", part);
         args.push(OscType::String(part.to_string()));
     }
 
     let osc_address = parts[0];
-    println!("will send {} args to address {}", parts.len(), osc_address);
+    println!("will send {} args to address {}", args.len(), osc_address);
 
     let buffer = encoder::encode(&OscPacket::Message(OscMessage {
         addr: osc_address.to_string(),
         args: Some(args)
     })).unwrap();
 
-    socket.send_to(&buffer, destination_address).unwrap();
+    match socket.send_to(&buffer, destination_address) {
+        Ok(usize) => println!("OK, {} bytes sent", usize),
+        Err(_) => panic!("Error sending message")
+    }
 
 }
 
