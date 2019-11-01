@@ -85,30 +85,30 @@ fn send_message(socket: &std::net::UdpSocket, destination_address: std::net::Soc
 
 fn auto_type_arg (part: &str) -> OscType {
     
-    // let mut number: Option<OscType> = None;
-
-    let osc_int = match part.parse::<i32>() {
-        Ok(value) => Some(OscType::Int(value)),
-        Err(e) => None
-    };
-
-    let osc_float = match part.parse::<f32>() {
-        Ok(value) => Some(OscType::Float(value)),
-        Err(e) => None
-    };
-
-    if osc_int.is_some() {
-        osc_int.unwrap()
-    } else if osc_float.is_some() {
-        osc_float.unwrap()
-    } else {
-        OscType::String(part.to_string())
+    match part {
+        part if !part.parse::<i32>().is_err() => OscType::Int(part.parse::<i32>().unwrap()),
+        part if !part.parse::<f32>().is_err() => OscType::Float(part.parse::<f32>().unwrap()),
+        _ => OscType::String(part.to_string())
     }
 
-    // match number {
-    //     Some(number) => number,
-    //     _ => OscType::String(part.to_string())
+    // let osc_int = match part.parse::<i32>() {
+    //     Ok(value) => Some(OscType::Int(value)),
+    //     Err(e) => None
+    // };
+
+    // let osc_float = match part.parse::<f32>() {
+    //     Ok(value) => Some(OscType::Float(value)),
+    //     Err(e) => None
+    // };
+
+    // if osc_int.is_some() {
+    //     osc_int.unwrap()
+    // } else if osc_float.is_some() {
+    //     osc_float.unwrap()
+    // } else {
+    //     OscType::String(part.to_string())
     // }
+
 }
 
 
