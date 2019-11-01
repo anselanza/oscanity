@@ -1,17 +1,10 @@
 extern crate rosc;
 
-use rosc::OscPacket;
+use rosc::{OscPacket, OscMessage, OscType, encoder};
 use std::io;
 use std::env;
 use std::net::{SocketAddrV4, UdpSocket};
 use std::str::FromStr;
-
-fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
-    match SocketAddrV4::from_str(arg) {
-        Ok(address) => address,
-        Err(_) => panic!("Invalid ip:port address")
-    }
-}
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -21,32 +14,72 @@ fn main() {
         panic!(usage)
     }
     let receive_address = get_addr_from_arg(&args[1]);
-    // let send_address = get_addr_from_arg(&args[2]);
+    let send_address = get_addr_from_arg(&args[2]);
 
-    let sock = UdpSocket::bind(receive_address).unwrap();
-    println!("Listening to {}", receive_address);
+    let socket = UdpSocket::bind(receive_address).unwrap();
+    println!("Listening to {}, will send to {}", receive_address, send_address);
 
     let mut receive_buffer = [0u8; rosc::decoder::MTU];
 
     loop {
 
-        match sock.recv_from(&mut receive_buffer) {
-            Ok((size, addr)) => {
-                println!("Received packet (length {}) from: {}", size, addr);
-                let packet = rosc::decoder::decode(&receive_buffer[..size]).unwrap();
-                handle_packet(packet);
-            }
-            Err(e) => {
-                println!("Error receiving from socket: {}", e);
-                break;
-            }
-        }
+        // match sock.recv_from(&mut receive_buffer) {
+        //     Ok((size, addr)) => {
+        //         println!("Received packet (length {}) from: {}", size, addr);
+        //         let packet = rosc::decoder::decode(&receive_buffer[..size]).unwrap();
+        //         handle_packet(packet);
+        //     }
+        //     Err(e) => {
+        //         println!("Error receiving from socket: {}", e);
+        //         break;
+        //     }
+        // }
 
         let mut command = String::new();
 
         io::stdin().read_line(&mut command)
+
             .expect("Could not read that command");
 
+        match command.as_str().trim() {
+            "" => {
+                println!("You didn't type anything");
+            } 
+            _ => {
+                send_message(&socket, send_address, command.as_str().trim());
+            }
+        };
+        
+
+
+    }
+}
+
+fn send_message(socket: &std::net::UdpSocket, destination_address: std::net::SocketAddrV4, command: &str) {
+    let parts = command.split_whitespace().collect::<Vec<&str>>();
+    println!("parts: {:?}", parts);
+    let mut args: Vec<OscType> = Vec::new();
+    for part in &parts[1..parts.len()]  { // skip first element
+        println!("part: {:?}", part);
+        args.push(OscType::String(part.to_string()));
+    }
+
+    let osc_address = parts[0];
+    println!("will send {} args to address {}", parts.len(), osc_address);
+
+    let buffer = encoder::encode(&OscPacket::Message(OscMessage {
+        addr: osc_address.to_string(),
+        args: Some(args)
+    })).unwrap();
+
+    socket.send_to(&buffer, destination_address).unwrap();
+
+}
+
+fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
+    match SocketAddrV4::from_str(arg) {
+        Ok(address) => address,
+        Err(_) => panic!("Invalid ip:port address")
     }
 }
 
