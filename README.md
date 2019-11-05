@@ -15,7 +15,7 @@ Example command - send messages OSC messages to localhost:
 ```
 cargo run --bin send 127.0.0.1:12345
 ```
-This sets up a default "sending" host of `127.0.0.1:8080`, and sends OSC messages to the destination `127.0.0.1:12345` (in this case localhost). 
+This sets up a default "sending" host of `127.0.0.1:8080`, and sends OSC messages to the destination `127.0.0.1:12345` (in this case localhost).
 
 If you need it, you can include the host address as well:
 ```
