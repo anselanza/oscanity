@@ -8,36 +8,19 @@ use std::str::FromStr;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let usage = format!("Usage: {} RECEIVE_IP:RECEIVE_PORT SEND_IP:SEND_PORT", &args[0]);
+    let usage = format!("Usage: {} HOST_IP:HOST_PORT DEST_IP:DEST_PORT", &args[0]);
     if args.len() < 3 {
         println!("{}", usage);
         panic!(usage)
     }
-    let receive_address = get_addr_from_arg(&args[1]);
-    let send_address = get_addr_from_arg(&args[2]);
 
-    let socket = UdpSocket::bind(receive_address).unwrap();
-    println!("Listening to {}, will send to {}", receive_address, send_address);
+    let host_addr = get_addr_from_arg(&args[1]);
+    let dest_addr = get_addr_from_arg(&args[2]);
+    let socket = UdpSocket::bind(host_addr).unwrap();
 
-    let mut receive_buffer = [0u8; rosc::decoder::MTU];
+    println!("Will send to {}", dest_addr);
 
-    loop {
-
-        match socket.recv_from(&mut receive_buffer) {
-            Ok((size, addr)) => {
-                println!("Received packet (length {}) from: {}", size, addr);
-                let packet = rosc::decoder::decode(&receive_buffer[..size]).unwrap();
-                handle_packet(packet);
-            }
-            Err(e) => {
-                println!("Error receiving from socket: {}", e);
-                break;
-            }
-            _ => {
-                println!("something else");
-                break;
-            }
-        }
+    loop {       
 
         let mut command = String::new();
 
@@ -50,12 +33,10 @@ fn main() {
                 println!("You didn't type anything");
             } 
             _ => {
-                send_message(&socket, send_address, command.as_str().trim());
+                send_message(&socket, dest_addr, command.as_str().trim());
             }
         };
         
-
-
     }
 }
 
@@ -95,26 +76,7 @@ fn auto_type_arg (part: &str) -> OscType {
         _ => OscType::String(part.to_string())
     }
 
-    // let osc_int = match part.parse::<i32>() {
-    //     Ok(value) => Some(OscType::Int(value)),
-    //     Err(e) => None
-    // };
-
-    // let osc_float = match part.parse::<f32>() {
-    //     Ok(value) => Some(OscType::Float(value)),
-    //     Err(e) => None
-    // };
-
-    // if osc_int.is_some() {
-    //     osc_int.unwrap()
-    // } else if osc_float.is_some() {
-    //     osc_float.unwrap()
-    // } else {
-    //     OscType::String(part.to_string())
-    // }
-
 }
-
 
 fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
     match SocketAddrV4::from_str(arg) {
@@ -123,21 +85,3 @@ fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
     }
 }
 
-fn handle_packet(packet: OscPacket) {
-    match packet {
-        OscPacket::Message(msg) => {
-            let arg_list = match msg.args {
-                Some(args) => {
-                    format!("{:?}", args)
-                }
-                None => {
-                   String::from("zero")
-                }
-            };
-            println!("RCV OSC {} :: {}", msg.addr, arg_list);
-        }
-        OscPacket::Bundle(bundle) => {
-            println!("OSC Bundle: {:?}", bundle);
-        }
-    }
-}
