@@ -37,3 +37,7 @@ OSC types for messages are auto-detected. For example, the command:
 final args: [String("hello"), Int(1), Int(2), Float(3.0), String("four")]
 ```
 
+## Background
+This is my first working software written in Rust, so be nice.
+
+The hard stuff is done by the library I am depending on here, [rosc](https://github.com/klingtnet/rosc) - "an implementation of the OSC 1.0 protocol in pure Rust".
