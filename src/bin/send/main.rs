@@ -18,7 +18,7 @@ fn main() {
     let dest_addr = get_addr_from_arg(&args[2]);
     let socket = UdpSocket::bind(host_addr).unwrap();
 
-    println!("Will send to {}", dest_addr);
+    println!("Will send to {} from host {}", dest_addr, host_addr);
 
     loop {       
 

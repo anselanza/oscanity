@@ -7,16 +7,15 @@ use std::str::FromStr;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let usage = format!("Usage: {} RECEIVE_IP:RECEIVE_PORT SEND_IP:SEND_PORT", &args[0]);
-    if args.len() < 3 {
+    let usage = format!("Usage: {} RECEIVE_IP:RECEIVE_PORT", &args[0]);
+    if args.len() < 2 {
         println!("{}", usage);
         panic!(usage)
     }
     let receive_address = get_addr_from_arg(&args[1]);
-    let send_address = get_addr_from_arg(&args[2]);
 
     let socket = UdpSocket::bind(receive_address).unwrap();
-    println!("Listening to {}, will send to {}", receive_address, send_address);
+    println!("Listening to {}", receive_address);
 
     let mut receive_buffer = [0u8; rosc::decoder::MTU];
 
