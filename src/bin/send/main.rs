@@ -9,13 +9,14 @@ use std::str::FromStr;
 fn main() {
     let args: Vec<String> = env::args().collect();
     let usage = format!("Usage: {} HOST_IP:HOST_PORT DEST_IP:DEST_PORT", &args[0]);
-    if args.len() < 3 {
+    // println!("args length {}", args.len());
+    if args.len() != 2 && args.len() != 3 {
         println!("{}", usage);
         panic!(usage)
     }
 
-    let host_addr = get_addr_from_arg(&args[1]);
-    let dest_addr = get_addr_from_arg(&args[2]);
+    let host_addr: SocketAddrV4 = if args.len() == 3 { get_addr_from_arg(&args[1]) } else { get_addr_from_arg("0.0.0.0:8080") };
+    let dest_addr: SocketAddrV4 = if args.len() == 2 { get_addr_from_arg(&args[1]) } else { get_addr_from_arg(&args[2]) };
     let socket = UdpSocket::bind(host_addr).unwrap();
 
     println!("Will send to {} from host {}", dest_addr, host_addr);
