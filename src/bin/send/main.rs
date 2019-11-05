@@ -1,8 +1,8 @@
 extern crate rosc;
 
-use rosc::{OscPacket, OscMessage, OscType, encoder};
-use std::io;
+use rosc::{encoder, OscMessage, OscPacket, OscType};
 use std::env;
+use std::io;
 use std::net::{SocketAddrV4, UdpSocket};
 use std::str::FromStr;
 
@@ -15,38 +15,51 @@ fn main() {
         panic!(usage)
     }
 
-    let host_addr: SocketAddrV4 = if args.len() == 3 { get_addr_from_arg(&args[1]) } else { get_addr_from_arg("0.0.0.0:8080") };
-    let dest_addr: SocketAddrV4 = if args.len() == 2 { get_addr_from_arg(&args[1]) } else { get_addr_from_arg(&args[2]) };
+    let host_addr: SocketAddrV4 = if args.len() == 3 {
+        get_addr_from_arg(&args[1])
+    } else {
+        get_addr_from_arg("0.0.0.0:8080")
+    };
+
+    let dest_addr: SocketAddrV4 = if args.len() == 2 {
+        get_addr_from_arg(&args[1])
+    } else {
+        get_addr_from_arg(&args[2])
+    };
+
     let socket = UdpSocket::bind(host_addr).unwrap();
 
     println!("Will send to {} from host {}", dest_addr, host_addr);
 
-    loop {       
-
+    loop {
         let mut command = String::new();
 
-        io::stdin().read_line(&mut command)
-
+        io::stdin()
+            .read_line(&mut command)
             .expect("Could not read that command");
 
         match command.as_str().trim() {
             "" => {
                 println!("You didn't type anything");
-            } 
+            }
             _ => {
                 send_message(&socket, dest_addr, command.as_str().trim());
             }
         };
-        
     }
 }
 
-fn send_message(socket: &std::net::UdpSocket, destination_address: std::net::SocketAddrV4, command: &str) {
+fn send_message(
+    socket: &std::net::UdpSocket,
+    destination_address: std::net::SocketAddrV4,
+    command: &str,
+) {
     let parts = command.split_whitespace().collect::<Vec<&str>>();
     println!("parts: {:?}", parts);
     let mut args: Vec<OscType> = Vec::new();
-    
-    for part in &parts[1..parts.len()]  { // skip first element
+
+    for part in &parts[1..parts.len()] {
+        // skip first element
         println!("part: {:?}", part);
 
         args.push(auto_type_arg(part));
@@ -59,30 +72,27 @@ fn send_message(socket: &std::net::UdpSocket, destination_address: std::net::Soc
 
     let buffer = encoder::encode(&OscPacket::Message(OscMessage {
         addr: osc_address.to_string(),
-        args: Some(args)
-    })).unwrap();
+        args: Some(args),
+    }))
+    .unwrap();
 
     match socket.send_to(&buffer, destination_address) {
         Ok(usize) => println!("OK, {} bytes sent", usize),
-        Err(_) => panic!("Error sending message")
+        Err(_) => panic!("Error sending message"),
     }
-
 }
 
-fn auto_type_arg (part: &str) -> OscType {
-    
+fn auto_type_arg(part: &str) -> OscType {
     match part {
-        part if !part.parse::<i32>().is_err() => OscType::Int(part.parse::<i32>().unwrap()),
-        part if !part.parse::<f32>().is_err() => OscType::Float(part.parse::<f32>().unwrap()),
-        _ => OscType::String(part.to_string())
+        part if part.parse::<i32>().is_ok() => OscType::Int(part.parse::<i32>().unwrap()),
+        part if part.parse::<f32>().is_ok() => OscType::Float(part.parse::<f32>().unwrap()),
+        _ => OscType::String(part.to_string()),
     }
-
 }
 
 fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
     match SocketAddrV4::from_str(arg) {
         Ok(address) => address,
-        Err(_) => panic!("Invalid ip:port address")
+        Err(_) => panic!("Invalid ip:port address"),
     }
 }
-
