@@ -1,11 +1,20 @@
 # OSCanity
 Sanity for OSC. See what I did there?
 
+![oscanity in action](./docs/oscanity-demo.gif)
+
+OSCanity is a command-line utility for testing sending and receiving [OSC](http://opensoundcontrol.org/) messages.
+
 ## Usage
+### Running the executables
+If you have downloaded the compiled [release](https://github.com/anselanza/oscanity/releases) binaries, you can simply run either executable from your command-line, e.g. `./send` or `./receive`
+
+If you have cloned/downloaded the source code instead, you can use `cargo run --bin release` or `cargo run --bin send`
+
 ### Receiving
 Example command - listen for incoming OSC messages:
 ```
-cargo run --bin receive 0.0.0.0:12345
+./receive 0.0.0.0:12345
 ```
 This would listen on all network interfaces (`0.0.0.0` on the port `12345`). Substitute your own values (especially the port) as needed.
 
@@ -13,13 +22,13 @@ This would listen on all network interfaces (`0.0.0.0` on the port `12345`). Sub
 #### Configure
 Example command - send messages OSC messages to localhost:
 ```
-cargo run --bin send 127.0.0.1:12345
+./send 127.0.0.1:12345
 ```
 This sets up a default "sending" host of `127.0.0.1:8080`, and sends OSC messages to the destination `127.0.0.1:12345` (in this case localhost).
 
 If you need it, you can include the host address as well:
 ```
-cargo run --bin send 192.168.1.130:5555 127.0.0.1:12345
+./send 192.168.1.130:5555 127.0.0.1:12345
 ```
 Now the "sending" host is `192.168.1.130:555` and the destination is as before.
 
