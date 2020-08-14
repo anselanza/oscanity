@@ -14,13 +14,12 @@ fn main() {
     }
     let receive_address = get_addr_from_arg(&args[1]);
 
-	let socket = match UdpSocket::bind(receive_address) {
-		Ok(s) => s,
-		Err(e) => {
-			panic!("Error binding udp socket: {}", e);
-		}
-	};
-    // let socket = UdpSocket::bind(receive_address).unwrap();
+    let socket = match UdpSocket::bind(receive_address) {
+        Ok(s) => s,
+        Err(e) => {
+            panic!("Error binding udp socket: {}", e);
+        }
+    };
     println!("Listening to {}", receive_address);
 
     let mut receive_buffer = [0u8; rosc::decoder::MTU];
@@ -29,7 +28,12 @@ fn main() {
         match socket.recv_from(&mut receive_buffer) {
             Ok((size, addr)) => {
                 println!("Received packet (length {}) from: {}", size, addr);
-                let packet = rosc::decoder::decode(&receive_buffer[..size]).unwrap();
+                let packet = match rosc::decoder::decode(&receive_buffer[..size]) {
+					Ok(b) => b,
+					Err(e) => {
+						panic!("Error decoding packet: {:?}", e);
+					}
+				};
                 handle_packet(packet);
             }
             Err(e) => {

@@ -27,7 +27,12 @@ fn main() {
         get_addr_from_arg(&args[2])
     };
 
-    let socket = UdpSocket::bind(host_addr).unwrap();
+    let socket = match UdpSocket::bind(host_addr) {
+		Ok(s) => s,
+		Err(e) => {
+			panic!("Error binding udp socket: {}", e);
+		}
+	};
 
     println!("Will send to {} from host {}", dest_addr, host_addr);
 
@@ -70,11 +75,15 @@ fn send_message(
     let osc_address = parts[0];
     println!("will send {} args to address {}", args.len(), osc_address);
 
-    let buffer = encoder::encode(&OscPacket::Message(OscMessage {
+    let buffer = match encoder::encode(&OscPacket::Message(OscMessage {
         addr: osc_address.to_string(),
         args: Some(args),
-    }))
-    .unwrap();
+    })) {
+		Ok(b) => b,
+		Err(e) => {
+			panic!("Error encoding message: {:?}", e);
+		}
+	};
 
     match socket.send_to(&buffer, destination_address) {
         Ok(usize) => println!("OK, {} bytes sent", usize),
