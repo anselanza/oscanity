@@ -28,11 +28,11 @@ fn main() {
     };
 
     let socket = match UdpSocket::bind(host_addr) {
-		Ok(s) => s,
-		Err(e) => {
-			panic!("Error binding udp socket: {}", e);
-		}
-	};
+        Ok(s) => s,
+        Err(e) => {
+            panic!("Error binding udp socket: {}", e);
+        }
+    };
 
     println!("Will send to {} from host {}", dest_addr, host_addr);
 
@@ -75,15 +75,11 @@ fn send_message(
     let osc_address = parts[0];
     println!("will send {} args to address {}", args.len(), osc_address);
 
-    let buffer = match encoder::encode(&OscPacket::Message(OscMessage {
+    let buffer = encoder::encode(&OscPacket::Message(OscMessage {
         addr: osc_address.to_string(),
         args: Some(args),
-    })) {
-		Ok(b) => b,
-		Err(e) => {
-			panic!("Error encoding message: {:?}", e);
-		}
-	};
+    }))
+    .expect("Error encoding message");
 
     match socket.send_to(&buffer, destination_address) {
         Ok(usize) => println!("OK, {} bytes sent", usize),
@@ -100,8 +96,5 @@ fn auto_type_arg(part: &str) -> OscType {
 }
 
 fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
-    match SocketAddrV4::from_str(arg) {
-        Ok(address) => address,
-        Err(_) => panic!("Invalid ip:port address"),
-    }
+    SocketAddrV4::from_str(arg).expect("Invalid ip:port address")
 }
