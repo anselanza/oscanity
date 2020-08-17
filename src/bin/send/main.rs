@@ -27,12 +27,7 @@ fn main() {
         get_addr_from_arg(&args[2])
     };
 
-    let socket = match UdpSocket::bind(host_addr) {
-        Ok(s) => s,
-        Err(e) => {
-            panic!("Error binding udp socket: {}", e);
-        }
-    };
+    let socket = UdpSocket::bind(host_addr).expect("Error binding udp socket");
 
     println!("Will send to {} from host {}", dest_addr, host_addr);
 
