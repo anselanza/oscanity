@@ -12,10 +12,18 @@ pub struct SendOptions {
     #[arg(long = "host", default_value_t = String::from("127.0.0.1"))]
     pub host: String,
 
-    #[arg(long = "port", default_value_t = 12345)]
+    #[arg(
+        long = "port",
+        default_value_t = 12345,
+        help = "Port that the destination will be listening on (target port)"
+    )]
     pub destination_port: usize,
 
-    #[arg(long = "port.bind", default_value_t = 54321)]
+    #[arg(
+        long = "port.bind",
+        default_value_t = 54321,
+        help = "Port to bind as source locally; usually need not be changed"
+    )]
     pub src_bound_port: usize,
 }
 

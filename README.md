@@ -7,30 +7,23 @@ OSCanity is a command-line utility for testing sending and receiving [OSC](http:
 
 ## Usage
 ### Running the executables
-If you have downloaded the compiled [release](https://github.com/anselanza/oscanity/releases) binaries, you can simply run either executable from your command-line, e.g. `./send` or `./receive`
-
-If you have cloned/downloaded the source code instead, you can use `cargo run --bin release` or `cargo run --bin send`
+If installed, e.g. using `cargo install oscanity`, then you can simply run `oscanity receive` and `oscanity send` commands. Append `--help` at the end for command-line options.
 
 ### Receiving
 Example command - listen for incoming OSC messages:
 ```
-osc-receive 0.0.0.0:12345
+oscanity receive
 ```
-This would listen on all network interfaces (`0.0.0.0` on the port `12345`). Substitute your own values (especially the port) as needed.
+This would listen on all network interfaces (`0.0.0.0` on the port `12345`). Substitute your own values as needed, e.g. `--port 3333`.
 
 ### Sending
 #### Configure
 Example command - send messages OSC messages to localhost:
 ```
-osc-send 127.0.0.1:12345
+oscanity send
 ```
-This sets up a default "sending" host of `127.0.0.1:8080`, and sends OSC messages to the destination `127.0.0.1:12345` (in this case localhost).
+This sets up a default "sending" socket bound to `127.0.0.1:54321`, and sends OSC messages to the destination `127.0.0.1:12345`. You typically only need to specify a different target `--host` and `--port` (i.e. destination port of the receiving end).
 
-If you need it, you can include the host address as well:
-```
-osc-send 192.168.1.130:5555 127.0.0.1:12345
-```
-Now the "sending" host is `192.168.1.130:555` and the destination is as before.
 
 #### Now, send messages
 The sending CLI does *nothing* at first (apart from validating any address settings).
@@ -45,8 +38,3 @@ OSC types for messages are auto-detected. For example, the command:
 ```
 final args: [String("hello"), Int(1), Int(2), Float(3.0), String("four")]
 ```
-
-## Background
-This is my first working software written in Rust, so be nice.
-
-The hard stuff is done by the library I am depending on here, [rosc](https://github.com/klingtnet/rosc) - "an implementation of the OSC 1.0 protocol in pure Rust".
