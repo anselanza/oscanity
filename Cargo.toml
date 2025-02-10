@@ -1,10 +1,16 @@
 [package]
 name = "oscanity"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Stephen Buchanan <stephen.buchanan@random.studio>"]
 description = "Lightweight command-line tools for sending and receiving OSC messages"
 license = "MIT"
 edition = "2021"
 
+[[bin]]
+name = "oscanity"
+
 [dependencies]
+clap = { version = "4.5.28", features = ["derive"] }
 rosc = "~0.1"
+env_logger = "0.10.0"
+log = "0.4.18"
