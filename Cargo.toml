@@ -2,7 +2,7 @@
 name = "oscanity"
 version = "0.1.2"
 authors = ["Stephen Buchanan <stephen.buchanan@random.studio>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 rosc = "~0.1"

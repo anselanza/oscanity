@@ -9,8 +9,8 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let usage = format!("Usage: {} RECEIVE_IP:RECEIVE_PORT", &args[0]);
     if args.len() < 2 {
-        println!("{}", usage);
-        panic!(usage)
+        println!("{}", &usage);
+        panic!()
     }
     let receive_address = get_addr_from_arg(&args[1]);
 

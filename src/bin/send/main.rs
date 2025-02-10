@@ -12,7 +12,7 @@ fn main() {
     // println!("args length {}", args.len());
     if args.len() != 2 && args.len() != 3 {
         println!("{}", usage);
-        panic!(usage)
+        panic!()
     }
 
     let host_addr: SocketAddrV4 = if args.len() == 3 {
