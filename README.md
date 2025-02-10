@@ -14,7 +14,7 @@ If you have cloned/downloaded the source code instead, you can use `cargo run --
 ### Receiving
 Example command - listen for incoming OSC messages:
 ```
-./receive 0.0.0.0:12345
+osc-receive 0.0.0.0:12345
 ```
 This would listen on all network interfaces (`0.0.0.0` on the port `12345`). Substitute your own values (especially the port) as needed.
 
@@ -22,20 +22,20 @@ This would listen on all network interfaces (`0.0.0.0` on the port `12345`). Sub
 #### Configure
 Example command - send messages OSC messages to localhost:
 ```
-./send 127.0.0.1:12345
+osc-send 127.0.0.1:12345
 ```
 This sets up a default "sending" host of `127.0.0.1:8080`, and sends OSC messages to the destination `127.0.0.1:12345` (in this case localhost).
 
 If you need it, you can include the host address as well:
 ```
-./send 192.168.1.130:5555 127.0.0.1:12345
+osc-send 192.168.1.130:5555 127.0.0.1:12345
 ```
 Now the "sending" host is `192.168.1.130:555` and the destination is as before.
 
 #### Now, send messages
 The sending CLI does *nothing* at first (apart from validating any address settings).
 
-Type messages in the format `address/ arg1 arg2 ...` followed by Enter/Return.
+Type messages in the format `/address arg1 arg2 ...` followed by Enter/Return.
 
 OSC types for messages are auto-detected. For example, the command:
 ```
