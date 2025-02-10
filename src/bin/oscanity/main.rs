@@ -1,7 +1,10 @@
 use clap::{Parser, Subcommand};
-use env_logger::{Builder, Env};
+use env_logger::Env;
 use log::*;
-use oscanity::receive::{receive_osc, ReceiveOptions};
+use oscanity::{
+    receive::{receive_osc, ReceiveOptions},
+    send::{send_osc, SendOptions},
+};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -16,6 +19,7 @@ pub struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Receive(ReceiveOptions),
+    Send(SendOptions),
 }
 
 fn main() {
@@ -29,5 +33,6 @@ fn main() {
 
     match &cli.command {
         Commands::Receive(receive_options) => receive_osc(receive_options),
+        Commands::Send(send_options) => send_osc(send_options),
     }
 }

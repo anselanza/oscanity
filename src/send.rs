@@ -1,35 +1,37 @@
 extern crate rosc;
 
+use clap::Args;
+use log::*;
 use rosc::{encoder, OscMessage, OscPacket, OscType};
-use std::env;
 use std::io;
 use std::net::{SocketAddrV4, UdpSocket};
 use std::str::FromStr;
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let usage = format!("Usage: {} HOST_IP:HOST_PORT DEST_IP:DEST_PORT", &args[0]);
-    // println!("args length {}", args.len());
-    if args.len() != 2 && args.len() != 3 {
-        println!("{}", usage);
-        panic!()
-    }
+#[derive(Args, Default)]
+pub struct SendOptions {
+    #[arg(long = "host", default_value_t = String::from("127.0.0.1"))]
+    pub host: String,
 
-    let host_addr: SocketAddrV4 = if args.len() == 3 {
-        get_addr_from_arg(&args[1])
-    } else {
-        get_addr_from_arg("0.0.0.0:8080")
-    };
+    #[arg(long = "port", default_value_t = 12345)]
+    pub destination_port: usize,
 
-    let dest_addr: SocketAddrV4 = if args.len() == 2 {
-        get_addr_from_arg(&args[1])
-    } else {
-        get_addr_from_arg(&args[2])
-    };
+    #[arg(long = "port.bind", default_value_t = 54321)]
+    pub src_bound_port: usize,
+}
 
-    let socket = UdpSocket::bind(host_addr).expect("Error binding udp socket");
+pub fn send_osc(options: &SendOptions) {
+    let bind_address =
+        SocketAddrV4::from_str(&format!("{}:{}", options.host, options.src_bound_port))
+            .expect("failed to convert string to address");
+    let dest_address =
+        SocketAddrV4::from_str(&format!("{}:{}", options.host, options.destination_port))
+            .expect("failed to convert string to address");
 
-    println!("Will send to {} from host {}", dest_addr, host_addr);
+    info!(
+        "Will send to host {}; from bound port {} => destination port {}",
+        options.host, options.src_bound_port, options.destination_port
+    );
+    let socket = UdpSocket::bind(bind_address).expect("Error binding udp socket");
 
     loop {
         let mut command = String::new();
@@ -40,10 +42,10 @@ fn main() {
 
         match command.as_str().trim() {
             "" => {
-                println!("You didn't type anything");
+                error!("You didn't type anything");
             }
             _ => {
-                send_message(&socket, dest_addr, command.as_str().trim());
+                send_message(&socket, &dest_address, command.as_str().trim());
             }
         };
     }
@@ -51,16 +53,16 @@ fn main() {
 
 fn send_message(
     socket: &std::net::UdpSocket,
-    destination_address: std::net::SocketAddrV4,
+    destination_address: &std::net::SocketAddrV4,
     command: &str,
 ) {
     let parts = command.split_whitespace().collect::<Vec<&str>>();
-    println!("parts: {:?}", parts);
+    debug!("parts: {:?}", parts);
     let mut args: Vec<OscType> = Vec::new();
 
     for part in &parts[1..parts.len()] {
         // skip first element
-        println!("part: {:?}", part);
+        debug!("part: {:?}", part);
 
         args.push(auto_type_arg(part));
     }
@@ -68,7 +70,7 @@ fn send_message(
     println!("final args: {:?}", args);
 
     let osc_address = parts[0];
-    println!("will send {} args to address {}", args.len(), osc_address);
+    debug!("will send {} args to address {}", args.len(), osc_address);
 
     let buffer = encoder::encode(&OscPacket::Message(OscMessage {
         addr: osc_address.to_string(),
@@ -88,8 +90,4 @@ fn auto_type_arg(part: &str) -> OscType {
         part if part.parse::<f32>().is_ok() => OscType::Float(part.parse::<f32>().unwrap()),
         _ => OscType::String(part.to_string()),
     }
-}
-
-fn get_addr_from_arg(arg: &str) -> SocketAddrV4 {
-    SocketAddrV4::from_str(arg).expect("Invalid ip:port address")
 }
